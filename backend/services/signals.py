@@ -109,30 +109,40 @@ class SignalGenerator:
         
         total_score = buy_score + sell_score
         
-        if buy_score >= 5 and buy_score > sell_score * 1.5:
+        print(f"{symbol}: buy={buy_score}, sell={sell_score}")
+        
+        if buy_score >= 4 and buy_score > sell_score * 1.3:
             signal = self._create_signal(
                 symbol, latest, SignalType.STRONG_BUY, buy_reasons, df
             )
             signals.append(signal)
-        elif buy_score >= 3 and buy_score > sell_score:
+        elif buy_score >= 2 and buy_score > sell_score:
             signal = self._create_signal(
                 symbol, latest, SignalType.BUY, buy_reasons, df
             )
             signals.append(signal)
-        elif sell_score >= 5 and sell_score > buy_score * 1.5:
+        elif sell_score >= 4 and sell_score > buy_score * 1.3:
             signal = self._create_signal(
                 symbol, latest, SignalType.STRONG_SELL, sell_reasons, df
             )
             signals.append(signal)
-        elif sell_score >= 3 and sell_score > buy_score:
+        elif sell_score >= 2 and sell_score > buy_score:
             signal = self._create_signal(
                 symbol, latest, SignalType.SELL, sell_reasons, df
             )
             signals.append(signal)
         else:
+            reasons = []
+            if buy_score > 0:
+                reasons.append(f"Buy pressure ({buy_score} points)")
+            if sell_score > 0:
+                reasons.append(f"Sell pressure ({sell_score} points)")
+            if not reasons:
+                reasons = ["Market consolidating - waiting for breakout"]
+            
             signal = self._create_signal(
                 symbol, latest, SignalType.NEUTRAL,
-                ["No clear direction - waiting for confirmation"], df
+                reasons, df
             )
             signals.append(signal)
         

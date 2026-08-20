@@ -56,24 +56,32 @@ async def get_all_signals(
         for symbol in symbol_list:
             try:
                 df = market_data.get_symbol_data(symbol)
-                if df is None or len(df) < 50:
-                    print(f"Skipping {symbol}: insufficient data ({len(df) if df is not None else 0} candles)")
+                if df is None:
+                    print(f"No data for {symbol}")
+                    continue
+                if len(df) < 50:
+                    print(f"Skipping {symbol}: insufficient data ({len(df)} candles)")
                     continue
                 
+                print(f"Processing {symbol}: {len(df)} candles")
                 df = technical_indicators.calculate_all(df)
                 signals = signal_generator.generate_signals(symbol, df)
+                print(f"Generated {len(signals)} signals for {symbol}")
                 
                 for signal in signals:
                     signal_dict = signal.to_dict()
                     signal_dict["news"] = await news_calendar.get_upcoming_events()
                     signal_dict["market_status"] = market_data.get_market_status()
                     all_signals.append(signal_dict)
+                    print(f"Signal: {symbol} - {signal.signal_type}")
                     
             except Exception as e:
                 print(f"Error processing {symbol}: {e}")
                 import traceback
                 traceback.print_exc()
                 continue
+        
+        print(f"Total signals generated: {len(all_signals)}")
         
         strong_signals = [
             s for s in all_signals
@@ -201,6 +209,38 @@ async def get_symbols():
             "ETH-USD": "Ethereum",
         },
     }
+
+
+@app.get("/api/debug/{symbol}")
+async def debug_symbol(symbol: str):
+    try:
+        df = market_data.get_symbol_data(symbol)
+        if df is None:
+            return {"error": "No data returned", "symbol": symbol}
+        
+        result = {
+            "symbol": symbol,
+            "candles": len(df),
+            "columns": list(df.columns),
+            "sample": df.tail(3).to_dict("records") if len(df) > 0 else [],
+        }
+        
+        if len(df) >= 50:
+            df = technical_indicators.calculate_all(df)
+            latest = df.iloc[-1]
+            result["indicators"] = {
+                "rsi": round(float(latest.get("rsi", 0)), 2),
+                "macd": round(float(latest.get("macd", 0)), 5),
+                "ema_9": round(float(latest.get("ema_9", 0)), 5),
+                "ema_21": round(float(latest.get("ema_21", 0)), 5),
+            }
+            
+            signals = signal_generator.generate_signals(symbol, df)
+            result["signals"] = [s.to_dict() for s in signals]
+        
+        return result
+    except Exception as e:
+        return {"error": str(e), "symbol": symbol}
 
 
 @app.post("/api/notifications/send")
