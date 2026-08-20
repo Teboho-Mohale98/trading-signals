@@ -25,7 +25,7 @@ export default function Home() {
       
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       
-      const signalsRes = await fetch(`${API_URL}/api/signals`);
+      const signalsRes = await fetch(`${API_URL}/api/signals?symbols=AAPL,MSFT,TSLA,NVDA,EURUSD=X,GBPUSD=X,BTC-USD`);
       const signalsData = await signalsRes.json();
       
       setSignals(signalsData.signals || []);
