@@ -10,6 +10,15 @@ class Settings(BaseSettings):
     SMTP_PASS: str = ""
     ALERT_EMAIL: str = ""
     
+    WHATSAPP_CLOUD_API_TOKEN: str = ""
+    WHATSAPP_CLOUD_API_PHONE_ID: str = ""
+    WHATSAPP_CLOUD_API_VERSION: str = "v18.0"
+    WHATSAPP_RECIPIENT: str = ""
+    
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_WHATSAPP_NUMBER: str = "whatsapp:+14155238886"
+    
     SYMBOLS: List[str] = [
         "EURUSD=X", "GBPUSD=X", "USDJPY=X", "AUDUSD=X",
         "USDCHF=X", "USDCAD=X", "NZDUSD=X",

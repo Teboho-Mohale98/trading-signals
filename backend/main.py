@@ -10,6 +10,7 @@ from services.indicators import technical_indicators
 from services.signals import signal_generator, SignalType
 from services.telegram import telegram_notifier
 from services.email import email_notifier
+from services.whatsapp import whatsapp_notifier
 from services.news import news_calendar
 
 app = FastAPI(
@@ -245,11 +246,12 @@ async def debug_symbol(symbol: str):
 
 @app.post("/api/notifications/send")
 async def send_signal_notification(signal: dict):
-    results = {"telegram": False, "email": False}
+    results = {"telegram": False, "email": False, "whatsapp": False}
     
     if signal.get("signal_type") != "NEUTRAL":
         results["telegram"] = await telegram_notifier.send_signal(signal)
         results["email"] = await email_notifier.send_signal(signal)
+        results["whatsapp"] = await whatsapp_notifier.send_signal(signal)
     
     return {
         "notification_sent": any(results.values()),
@@ -291,6 +293,7 @@ async def trigger_scan(symbols: Optional[str] = Query(None)):
                 
                 await telegram_notifier.send_signal(signal_dict)
                 await email_notifier.send_signal(signal_dict)
+                await whatsapp_notifier.send_signal(signal_dict)
                 
                 results.append({
                     "symbol": symbol,

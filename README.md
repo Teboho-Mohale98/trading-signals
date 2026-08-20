@@ -93,6 +93,33 @@ trading-signals/
 3. Generate an app password
 4. Use this password for `SMTP_PASS`
 
+### Step 6: Setup WhatsApp Notifications
+
+#### Option A: WhatsApp Cloud API (Meta) - Free
+
+1. Go to https://developers.facebook.com
+2. Create a Meta Developer account
+3. Create a new app → Select "Business" type → Add "WhatsApp" product
+4. Get your **Phone Number ID** and generate a **Permanent Access Token**
+5. Add your phone number and verify it
+6. Add to Render env vars:
+   - `WHATSAPP_CLOUD_API_TOKEN`: Your permanent token
+   - `WHATSAPP_CLOUD_API_PHONE_ID`: Your phone number ID
+   - `WHATSAPP_RECIPIENT`: Your phone number (format: 27821234567)
+
+#### Option B: Twilio WhatsApp - Easiest ($0.005/msg)
+
+1. Go to https://www.twilio.com and sign up
+2. Get your Account SID and Auth Token from the dashboard
+3. Enable WhatsApp sandbox: https://console.twilio.com/us1/develop/sms/try-it-out/whatsapp-learn
+4. Send the join message from your phone to the sandbox number
+5. Add to Render env vars:
+   - `TWILIO_ACCOUNT_SID`: Your Account SID
+   - `TWILIO_AUTH_TOKEN`: Your Auth Token
+   - `WHATSAPP_RECIPIENT`: whatsapp:+27821234567
+
+**Note**: System tries Cloud API first, falls back to Twilio automatically.
+
 ## API Endpoints
 
 | Endpoint | Method | Description |

@@ -22,3 +22,17 @@ services:
         sync: false
       - key: ALERT_EMAIL
         sync: false
+      - key: WHATSAPP_CLOUD_API_TOKEN
+        sync: false
+      - key: WHATSAPP_CLOUD_API_PHONE_ID
+        sync: false
+      - key: WHATSAPP_CLOUD_API_VERSION
+        value: v18.0
+      - key: WHATSAPP_RECIPIENT
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        value: "whatsapp:+14155238886"
