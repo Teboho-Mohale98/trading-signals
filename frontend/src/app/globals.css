@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 248, 250, 252;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.signal-card {
+  @apply bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition-all duration-300 hover:shadow-xl;
+}
+
+.signal-buy {
+  @apply border-l-4 border-l-buy;
+}
+
+.signal-sell {
+  @apply border-l-4 border-l-sell;
+}
+
+.signal-neutral {
+  @apply border-l-4 border-l-neutral;
+}
+
+.indicator-badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-strong {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-moderate {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.badge-weak {
+  @apply bg-gray-100 text-gray-800;
+}
