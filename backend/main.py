@@ -40,8 +40,14 @@ async def root():
             "news": "/api/news",
             "market_status": "/api/market-status",
             "symbols": "/api/symbols",
+            "ping": "/api/ping",
         },
     }
+
+
+@app.get("/api/ping")
+async def ping():
+    return {"status": "alive", "timestamp": datetime.utcnow().isoformat()}
 
 
 @app.get("/api/signals")

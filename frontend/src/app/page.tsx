@@ -42,33 +42,51 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [customSymbol, setCustomSymbol] = useState('');
   const [selectedSymbols, setSelectedSymbols] = useState<string[]>(DEFAULT_SYMBOLS);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async (symbols?: string[]) => {
     try {
       setLoading(true);
+      setError(null);
       
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://trading-signals-a356.onrender.com';
       const symbolsToFetch = symbols || selectedSymbols;
       const symbolsParam = symbolsToFetch.join(',');
       
-      const signalsRes = await fetch(`${API_URL}/api/signals?symbols=${symbolsParam}`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000);
+      
+      const signalsRes = await fetch(`${API_URL}/api/signals?symbols=${symbolsParam}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      
+      if (!signalsRes.ok) {
+        throw new Error(`API returned ${signalsRes.status}`);
+      }
+      
       const signalsData = await signalsRes.json();
       
       setSignals(signalsData.signals || []);
       setAllSignals(signalsData.all_signals || []);
       
-      const newsRes = await fetch(`${API_URL}/api/news`);
+      const newsRes = await fetch(`${API_URL}/api/news`, { signal: controller.signal });
       const newsData = await newsRes.json();
       setNews(newsData.upcoming_events || []);
       setWarnings(newsData.current_status?.warnings || []);
       
-      const statusRes = await fetch(`${API_URL}/api/market-status`);
+      const statusRes = await fetch(`${API_URL}/api/market-status`, { signal: controller.signal });
       const statusData = await statusRes.json();
       setMarketStatus(statusData.market);
       
       setLastUpdate(new Date());
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching data:', error);
+      if (error.name === 'AbortError') {
+        setError('Backend is waking up from sleep. Please wait and try again in 30 seconds.');
+      } else {
+        setError('Failed to fetch signals. The backend may be waking up - try refreshing.');
+      }
     } finally {
       setLoading(false);
     }
@@ -77,7 +95,16 @@ export default function Home() {
   useEffect(() => {
     fetchData();
     const interval = setInterval(() => fetchData(), 60000);
-    return () => clearInterval(interval);
+    
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://trading-signals-a356.onrender.com';
+    const keepAlive = setInterval(() => {
+      fetch(`${API_URL}/api/ping`).catch(() => {});
+    }, 300000);
+    
+    return () => {
+      clearInterval(interval);
+      clearInterval(keepAlive);
+    };
   }, [fetchData]);
 
   const addSymbol = () => {
@@ -165,6 +192,21 @@ export default function Home() {
                 <li key={idx} className="text-sm text-red-700">• {warning}</li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-6 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+            <div className="flex items-center gap-2">
+              <Zap className="w-5 h-5 text-yellow-500" />
+              <p className="text-sm text-yellow-800">{error}</p>
+            </div>
+            <button
+              onClick={() => { setError(null); fetchData(); }}
+              className="mt-2 text-sm font-medium text-yellow-700 hover:text-yellow-900 underline"
+            >
+              Try again
+            </button>
           </div>
         )}
 
