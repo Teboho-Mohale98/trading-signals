@@ -56,7 +56,8 @@ async def get_all_signals(
         for symbol in symbol_list:
             try:
                 df = market_data.get_symbol_data(symbol)
-                if df is None or len(df) < 200:
+                if df is None or len(df) < 50:
+                    print(f"Skipping {symbol}: insufficient data ({len(df) if df is not None else 0} candles)")
                     continue
                 
                 df = technical_indicators.calculate_all(df)
@@ -70,6 +71,8 @@ async def get_all_signals(
                     
             except Exception as e:
                 print(f"Error processing {symbol}: {e}")
+                import traceback
+                traceback.print_exc()
                 continue
         
         strong_signals = [
@@ -104,10 +107,10 @@ async def get_symbol_signal(symbol: str):
         if df is None:
             raise HTTPException(status_code=404, detail=f"Symbol {symbol} not found")
         
-        if len(df) < 200:
+        if len(df) < 50:
             raise HTTPException(
                 status_code=400,
-                detail="Insufficient data for analysis (need 200+ candles)",
+                detail=f"Insufficient data for {symbol} ({len(df)} candles, need 50+)",
             )
         
         df = technical_indicators.calculate_all(df)
@@ -232,7 +235,7 @@ async def trigger_scan(symbols: Optional[str] = Query(None)):
                 continue
             
             df = market_data.get_symbol_data(symbol)
-            if df is None or len(df) < 200:
+            if df is None or len(df) < 50:
                 results.append({
                     "symbol": symbol,
                     "skipped": True,

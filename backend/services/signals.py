@@ -63,8 +63,12 @@ class SignalGenerator:
     def generate_signals(self, symbol: str, df: pd.DataFrame) -> List[Signal]:
         signals = []
         
-        if len(df) < 200:
+        min_candles = min(200, len(df) - 1)
+        if len(df) < 50:
+            print(f"Not enough data for {symbol}: {len(df)} candles")
             return signals
+        
+        df = df.tail(max(min_candles, 50)).reset_index(drop=True)
         
         latest = df.iloc[-1]
         prev = df.iloc[-2]
