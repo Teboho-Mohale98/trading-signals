@@ -23,7 +23,7 @@ export default function Home() {
     try {
       setLoading(true);
       
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://trading-signals-a356.onrender.com';
       
       const signalsRes = await fetch(`${API_URL}/api/signals?symbols=AAPL,MSFT,TSLA,NVDA,EURUSD=X,GBPUSD=X,BTC-USD`);
       const signalsData = await signalsRes.json();
